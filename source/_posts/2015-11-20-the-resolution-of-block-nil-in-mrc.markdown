@@ -25,7 +25,7 @@ iOS开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也�
 所以就大致将这个原理写了一下并且做了封装，其实非常简单，就是 `关联` + `block`。
 
 
-##### 1：创建一个叫`MMAutoNilHelper`的类
+##### 创建一个叫`MMAutoNilHelper`的类
 
 
 这个类只有一个属性，并且只干一件事情。这个属性是一个 `block`，类型为`void(^MMAutoNilBlock)(void)`;
@@ -53,7 +53,7 @@ typedef void(^MMAutoNilBlock)(void);
 ```
 
 
-##### 2：怎么用`MMAutoNilHelper`这个类
+##### 怎么用`MMAutoNilHelper`这个类
 
 
 我们的目的在于，在某一个var被释放时，指向这个 var 的 __block 型 var 都自动变为 nil ，那么我们就可以借助这个`autoNilBlock`来帮助我们完成这个事情，具体操作如下：
@@ -71,7 +71,7 @@ _setAssociatedObject(bSelf, &autoNilHelper, autoNilHelper, _ASSOCIATION_RETAIN);
 假如上面的 `bSelf` 随时都有被释放的可能，那么我们实例一个 `MMAutoNilHelper` 对象，并且将这个对象关联到 `bSelf`（就是自己）上，当bSelf被释放的时候，`autoNilHelper` 也会被释放，`autoNilHelper` 的 `dealloc` 方法就会被调用，此时，`_autoNilBlock()` 就会被调用，bSelf就会被设置为了 nil。这时，无论哪个 block 捕获了 bSelf，bSelf 都会变成 nil，这样就不会出现野指针的现象了。
 
 
-##### 3：更加优雅一点
+##### 更加优雅一点
 
 
 如果每次都要写那么多第二步的代码，那岂不是太啰嗦，所以可以创建一个 NSObject 的 category，将第二步的代码放在 category 的一个方法中：

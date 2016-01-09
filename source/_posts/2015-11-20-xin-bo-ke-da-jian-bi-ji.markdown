@@ -13,16 +13,16 @@ categories: "装逼指南"
 
 <!--more-->
 
-###概要：
+#### 概要：
 首先大概讲一下这个博客搭建的流程，博客的搭建其实是利用一个叫做 `octopress` 的项目，这个项目开源在 GitHub 上，我们将这个项目 clone 到本地，进行一些自定义设定：比如更换主题，更改布局等，当然前提是你需要会写 `html` `css` 等；然后再用 `markdown` 写一些文章， 最后利用这个项目把这些东西生成静态网页，Push 到 GitHub 的 master 上，然后访问响应的域名，就能看到自己的博客了。具体方法会在下面详细讲解。
 
-###必备工具：
+#### 必备工具：
 `Git` `Ruby` 如果你还没有安装这两个东西，请提前安装好。Mac 是自带 Git 的，所以只需要安装 Ruby。 这两个的安装教程不在本篇的范围内，请自己 Google 。
 申请一个 GitHub 账号，因为我们博客项目最终要托管到 Github 上。</br>
 
-###第一部分：博客的配置部署
+#### 第一部分：博客的配置部署
 
-####1. Clone 和 Install `octopress` 项目
+##### Clone 和 Install `octopress` 项目
 打开 `Terminal` ，进到桌面目录，然后输入以下命令：
 
 ```
@@ -61,7 +61,7 @@ rake preview
 http://localhost:4000
 ```
 
-#####Tips:更换主题
+**Tips:更换主题**
 `rake install` 之后，就已经安装了默认的主题，样式就是[唐巧的博客](http://blog.devtang.com)的样式
 当然也可以换成别的样式，比如我用的整个主题：
 
@@ -72,7 +72,7 @@ rake generate
 ```
 更多用法可以参考他的 [**Github**](https://github.com/shashankmehta/greyshade)
 
-####2. Deploy Blog 项目到 Github
+##### Deploy Blog 项目到 Github
 首先我们需要在 Github 新建一个 Repo 用来存放博客的源码和文章，将这个仓库命名必须以以下格式：
 
 ```
@@ -134,7 +134,7 @@ origin/source
 http://<username>.github.io
 ```
 
-###第二部分：开始写博客
+#### 第二部分：开始写博客
 
 部署完成就可以开始写博客了：
 
@@ -151,7 +151,7 @@ rake deploy                           //	自动将静态网页部署到master
 
 这里说明一下，new_post 新建的 md 文章 和原来的 md 文章全都在 `/source/_posts` 下，需要更改直接用 md 编辑器编辑即可，编辑器有很多：Mou、MacDown等等...</br>
 
-###第三部分：换个Mac继续写
+#### 第三部分：换个Mac继续写
 
 这里主要讲一下，如果换了一个新的环境，怎么 clone 下自己的博客项目，继续写博客：</br>
 
@@ -174,10 +174,11 @@ bundle install
 ```
 到这里，项目就被 clone 下来并且安装好了，还是同原来一样，博客的源码放在 source 分支，静态网页放在 _deploy 文件夹下的 master 分支，接着就是重复第二部分，可以继续写博客了。</br>
 
-#####Tips：(如果是临时使用的电脑，就可以忽略下面了）</br>
+**Tips：(如果是临时使用的电脑，就可以忽略下面了**
+
 如果是自己以后需要长期使用的办公环境，建议生成新的 SSH 并且添加到 GitHub 上，以后提交代码就比较方便了。
 
-###第四部分：部署到GitCafe
+#### 第四部分：部署到GitCafe
 
 国内访问 GitHub 速度目前来说还是不是很理想，所以自然访问我们部署在 GitHub 上的博客速度也不是非常理想，我 ping 了一下，每次访问 GitCafe 的博客时间花费大约在 100ms 左右，而部署在 GitCafe 速度大约 30ms。而且这还是 GitHub 不抽风的状态，有时候如果 github 稍微抽一下疯，那就不知道多久能上去了。所以我在搭建部署在 GitHub 之后又在 GitCafe 部署了一次。</br>
 
@@ -204,5 +205,5 @@ git push gitcafe master:gitcafe-pages
 
 对了，记得也设置一下 GitCafe 上的 SSH，以后提交就比较方便了。
 
-###写在最后
+### 写在最后
 如果有什么问题并且我能帮到你，请点击左边的`微博`按钮私信我，或者在下面给我留言，工作日我会以非常快的速度秒回你。
