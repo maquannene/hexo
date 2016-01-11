@@ -30,10 +30,11 @@ iOS开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也�
 
 这个类只有一个属性，并且只干一件事情。这个属性是一个 `block`，类型为`void(^MMAutoNilBlock)(void)`;
 
-```
+```objc
 typedef void(^MMAutoNilBlock)(void);
 
 @interface MMAutoNilHelper : NSObject
+
 @property (nonatomic, copy) MMAutoNilBlock autoNilBlock;
 
 @end
@@ -42,7 +43,7 @@ typedef void(^MMAutoNilBlock)(void);
 
 其次：这个类只干的一件事情就是在自己 dealloc 的时候调用这个 block ：
 
-```
+```objc
 - (void)dealloc {
     if (_autoNilBlock) {
         _autoNilBlock();
@@ -58,7 +59,7 @@ typedef void(^MMAutoNilBlock)(void);
 
 我们的目的在于，在某一个var被释放时，指向这个 var 的 __block 型 var 都自动变为 nil ，那么我们就可以借助这个`autoNilBlock`来帮助我们完成这个事情，具体操作如下：
 
-```
+```objc
 __block typeof(self) bSelf = self;
 MMAutoNilHelper *autoNilHelper = [[MMAutoNilHelper alloc] init];
 autoNilHelper.autoNilBlock = ^{
@@ -76,7 +77,7 @@ _setAssociatedObject(bSelf, &autoNilHelper, autoNilHelper, _ASSOCIATION_RETAIN);
 
 如果每次都要写那么多第二步的代码，那岂不是太啰嗦，所以可以创建一个 NSObject 的 category，将第二步的代码放在 category 的一个方法中：
 
-```
+```objc
 - (void)MMMrcWeak:(MMAutoNilConfigureBlock)autoNilConfigureBlock {
     MMAutoNilHelper *autoNilHelper = [[MMAutoNilHelper alloc] init];
     //	注意这里，这里不再是直接给autoNilHelper.autoNilBlock赋值，而是用一个 configureBlock 构造 autoNilHelper
@@ -90,7 +91,7 @@ _setAssociatedObject(bSelf, &autoNilHelper, autoNilHelper, _ASSOCIATION_RETAIN);
 
 此时，将配置配置 autoNilHelper 写成宏：
 
-```
+```objc
 #define MMMrcWeakObserver(x)                                                        \
 void * ptr = &x;                                                                    \
 [x MMMrcWeak:^(MMAutoNilHelper *autoNilHelper) {                                    \
@@ -104,7 +105,7 @@ void * ptr = &x;                                                                
 ```
 此时如果我们在碰到想要 bSelf 自动置为 nil，就只用写一句话 `MMMrcWeakObserver(bSelf)` 即可。
 
-```
+```objc
 __block typeof(self) bSelf = self;
 //  声明:MMMrcWeak 将bSelf 变成类似 arc下的weak，实现监听，如果当bSelf释放的时候，自动设为nil
 MMMrcWeakObserver(bSelf);                                                  
@@ -124,7 +125,7 @@ MMMrcWeakObserver(bSelf);
 
 那么我们继续加入解除关联的代码，宏大致如下：
 
-```
+```objc
 #define MMMrcWeakObserverCancel(x)                                                  \
 //	这里就利用了 ptr
 objc_setAssociatedObject(x, ptr, nil, OBJC_ASSOCIATION_RETAIN);                     \
@@ -132,7 +133,7 @@ objc_setAssociatedObject(x, ptr, nil, OBJC_ASSOCIATION_RETAIN);                 
 
 现在还有一个问题，我们要在下面这段代码中哪里去插入这句代码 `MMMrcWeakObserverCancel(bSelf)` 呢？
 
-```
+```objc
 [self qurey:^{
 	//	在这里？（1）
     if (bSelf) {
@@ -149,7 +150,7 @@ objc_setAssociatedObject(x, ptr, nil, OBJC_ASSOCIATION_RETAIN);                 
 ```
 这样一看，似乎 （2）和 （4）都需要加入 `MMMrcWeakObserverCancel `，好像用起来有点蛋疼，于是我将`MMMrcWeakObserverCancel `的宏改为如下:
 
-```
+```objc
 #define MMMrcWeakObserverCancel(x)                                                  \
 onExit {                                                                            \
     objc_setAssociatedObject(x, ptr, nil, OBJC_ASSOCIATION_RETAIN);                 \

@@ -5,6 +5,7 @@ date: 2016-01-05 09:28:24 +0800
 comments: true
 tags: "iOS"
 categories: "技术探讨"
+toc: false
 ---
 
 前一阵看了一片文章，是来自于百度的阳神（Sunnyxx）写的 [iOS 开发中的 Self-Manager 模式](http://blog.sunnyxx.com/2015/12/19/self-manager-pattern-in-ios/)，对于文章中所描写的使用 Self-Mananger 的场景，我在平时的开发中也遇到过很多次，所以在这里就举几个例子写一下我对于此类问题自己的一些看法。
@@ -20,7 +21,7 @@ categories: "技术探讨"
 
 那么理所当然这个 View 要保持纯净，即 View 类中不包含业务逻辑，并且能提供复用、易拆除等特点，我们需要将验证的事件回调出去，所以这个类大概是这样的：
 
-```
+```objc
 @protocol PwdVerifyViewDelegate <NSObject>
 
 - (BOOL)pwdVerifyView:(PwdVerifyView *)view canThroughPasswordVerify:(NSString *)password;
@@ -48,7 +49,7 @@ categories: "技术探讨"
 #### 改善：
 接下来，我们对这个 PwdVerifyView 开一个 Category，叫 PwdVerifyView（SelfManager），且自己实现自己的代理，大致代码如下：
 
-```
+```objc
 //	类方法实例
 + (instancetype)PwdVerifyViewWithSelfMananger
 {
@@ -72,7 +73,7 @@ categories: "技术探讨"
 
 delegate 是基于方法的，那么 category 中重复实现接口就会被覆盖，所以最后我将 PwdVerifyView 改成了 block 回调，如下：
 
-```
+```objc
 @interface PwdVerifyView : NSObject
 
 @property (nonatomic, copy, nullable) BOOL (^canThroughPasswordVerify) (PwdVerifyView *pwdVerifyView, NSString *passwrod);
@@ -82,7 +83,7 @@ delegate 是基于方法的，那么 category 中重复实现接口就会被覆�
 
 此时我也不用新开一个类别，只用将原来类别中代理回调改为 block 回调，并且新增一个类方法创建另一种验证方式的 PwdVerifyView 即可，代码如下：
 
-```
+```objc
 + (instancetype)PwdVerifyViewWithSelfManangerInXXXCondition
 {
     PwdVerfiyView *pwdVerfiyView = [[PwdVerfiyView alloc] init];
@@ -100,7 +101,7 @@ delegate 是基于方法的，那么 category 中重复实现接口就会被覆�
 
 我发现如果一旦将整个流程规制在类别中，那基本算是和外界断了耦合；换句话说外界用这个类别的类方法，整个密码验证逻辑和外界是没有任何关系的。但是如果我们有需求验证的最终密码由外面提供，那么我们就可以给类构造方法添加参数，类似下面：
 
-```
+```objc
 + (instancetype)PwdVerifyViewWithSelfMananger:(NSString *)pwd
 {
     PwdVerfiyView *pwdVerfiyView = [[PwdVerfiyView alloc] init];
