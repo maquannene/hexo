@@ -96,7 +96,7 @@ Linus 不到两周时间， C 写了一个分布式版本控制系统，1300 行
 </br>
 ### 四. Git 命令讲解
 
-#### init clone 
+#### 1.init clone 
 
 ```objc
 //初始化 git
@@ -105,7 +105,7 @@ git init
 git clone 
 ```
 	
-#### 配置 Git
+#### 2.配置 Git
 
 ```objc
 //查看配置
@@ -121,7 +121,7 @@ git config --global user.email johndoe@example.com
 git config --global core.editor emacs			
 ```
 
-#### add, stage
+#### 3.add, stage
 
 从`工作区`选取一些代码快照，加入到`暂存区`，即将要`commit`的内容
 
@@ -137,7 +137,7 @@ git add .
 * 提问：为什么会有`暂存区`这个概念？
 * 快照？
 
-#### 暂存 stash
+#### 4.暂存 stash
 
 ```objc
 //暂存当前工作区的变动
@@ -179,7 +179,7 @@ git add -i
 
 ```
 
-#### commit
+#### 5.commit
 
 将`暂存区`的代码快照`提交`到`本地仓库`
 
@@ -201,7 +201,7 @@ git commit --amend
 
 **注意：**这样会更改历史
 
-#### remote
+#### 6.remote
 
 远端，即远程服务器
 
@@ -218,7 +218,7 @@ git remote rm <主机名>
 git remote rename <原主机名> <新主机名>
 ```
 
-#### push
+#### 7.push
 
 将本地的分支信息推向远端
 
@@ -238,7 +238,7 @@ git push -f
 
 ```
 
-#### pull
+#### 8.pull
 
 pull = fetch + merge
 pull --rebase = fetch + rebase
@@ -250,7 +250,7 @@ git pull <远程主机名> <远程分支名>:<本地分支名>
 git pull --rebase <远程主机名> <远程分支名>:<本地分支名> 
 ```
 
-#### fetch
+#### 9.fetch
 
 将远程仓库新的提交的拉取到本地仓库
 
@@ -259,13 +259,13 @@ git fetch
 git fetch origin master	
 ```
 
-#### 合并 merge 演合 rebase
+#### 10.合并 merge 演合 rebase
 
 [LearnGit](http://pcottle.github.io/learnGitBranching/?NODEMO)
 
 把一个分支中的修改整合到另一个分支的办法有两种：`merge` 和 `rebase`
 
-##### 合并 merge
+##### a.合并 merge
 
 把指定分支 branchX 合并到当前分支，如果不进行 fast-forward 模式，就会产生新的提交点。</br>
 若有冲突发生时，新的提交点为解决冲突记录。
@@ -284,7 +284,7 @@ git merge origin branchX
 
 ![fast-foward](http://nvie.com/img/merge-without-ff@2x.png)
 
-##### 演合 rebase
+##### b.演合 rebase
 
 将当前分支和 branchX 产生分歧的 commit 点，重新在 branchX 演一遍。
 
@@ -306,14 +306,14 @@ git rebase branchX
 git rebase --onto branchA branchB branchC
 ```
 
-##### merge 和 rebase 的取舍
+##### c.merge 和 rebase 的取舍
 
 rebase: 保证了提交点的干净有序。</br>
 merge: 更加详细了记录了开发路线。
 
-#### 后悔药 reset revert reflog
+#### 10.后悔药 reset revert reflog
 
-##### reset
+##### 1.reset
 
 类似 SVN 的revert，将当前分支提交重置回某个提交点。
 
@@ -324,7 +324,7 @@ git reset [commit]
 
 注意：不要对已经在远程服务器的 commit 进行 reset
 
-##### revert
+##### 2.revert
 
 对某一次提交做一次反向操作，并且提交创建一个新提交
 
@@ -332,7 +332,7 @@ git reset [commit]
 git revert [commit]
 ```
 
-##### reflog
+##### 3.reflog
 
 列出 HEAD 经历过的记录，神器~
 
@@ -343,7 +343,7 @@ git reflog
 </br>
 ### 五. Git 开发模型--GitFlow
 
-#### branch
+#### 1.branch
 
 Git 分支不同于 SVN，不是对文件拷贝的副本，而是快照，使用起来非常轻量级。这使得开发中对分支的 new，merge，delete 变得非常廉价，更好的支持并发型开发。开分支，就是新建一个指针而已。
 
@@ -384,25 +384,25 @@ git checkout [commit]
 git checkout <fileName>
 ```
 
-#### GitFlow
+#### 2.GitFlow
 
 ![GitFlow](http://nvie.com/img/git-model@2x.png)
 
 </br>
 ### 六. 辅助利器
 
-#### [Zsh](https://github.com/robbyrussell/oh-my-zsh)
+#### 1.[Zsh](https://github.com/robbyrussell/oh-my-zsh)
 
-#### [GitDiff](https://github.com/johnno1962/GitDiff)
+#### 2.[GitDiff](https://github.com/johnno1962/GitDiff)
 
 </br>
 ### 七. 扩展
 
-#### git config
+#### 1.git config
 
-#### git rebase -i
+#### 2.git rebase -i
 
-#### cherry-pick
+#### 3.cherry-pick
 
 
 将一个提交点重新应用到当前分支，此时是一个新的提交号
@@ -413,8 +413,8 @@ git cherry-pick [commit]
 
 注意：永远不要 cherry-pick 已推送到远端的 commit，否则再次推送时会产生冲突。
 
-#### .gitignore
+#### 4..gitignore
 
-#### alias
+#### 5.alias
 
-#### ssh
+#### 6.ssh
