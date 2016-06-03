@@ -9,7 +9,7 @@ categories: "学习笔记"
 
 作者：林纳斯·托瓦兹 （Linus Torvalds），Linux 的伟大的副产物
 
-![Linus](http://s.siliconimg.com/kb/content_images/2013/08/21/227988/1377031471_938.jpg)
+![Linus](http://img0.imgtn.bdimg.com/it/u=2504201466,3383861494&fm=21&gp=0.jpg)
 
 Linus 在 1991 年创建了开源的 Linux 之后靠着开发者共同维护。
 
@@ -22,7 +22,6 @@ Linus 在 1991 年创建了开源的 Linux 之后靠着开发者共同维护。
 理查德・斯托尔曼（Richard Stallman）自由软件倡导者，精神领袖，GNU计划创造者
 
 ![RS](https://pic4.zhimg.com/2a980372a1e5aa27334e128fba5d556f_b.jpg)
-![RS2](https://pic4.zhimg.com/da98a459ed043acc176c6ca79d564417_b.jpg)
 
 ![xx](https://ss1.baidu.com/70cFfyinKgQFm2e88IuM_a/forum/pic/item/adaf2edda3cc7cd9684f8ce83e01213fb80e91a5.jpg)
 

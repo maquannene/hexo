@@ -69,9 +69,9 @@ theme: yelee
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git #部署工具的类型
-  repo: 
-    github: git@github.com:maquannene/maquannene.github.com.git,master
-    gitcafe: git@gitcafe.com:maquannene/maquannene.git,gitcafe-pages
+  repo:
+    github: https://github.com/maquannene/maquannene.github.com.git,master
+    gitcafe: https://git.coding.net/maquannene/maquannene.git,gitcafe-pages
 
 disqus: true
 disqus_shortname: maquannene
