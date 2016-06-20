@@ -1,4 +1,5 @@
 ---
 title: tags
-date: 2016-01-08 14:22:25
+date: yyyy-mm-dd hh:mm:ss
+layout: tags   # 添加使用 tags 模版
 ---

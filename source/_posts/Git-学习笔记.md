@@ -4,7 +4,7 @@ date: 2016-02-23 13:47:53
 tags: "Git" 
 categories: "学习笔记"
 ---
-</br>
+
 ### 一.Git 的产生
 
 作者：林纳斯·托瓦兹 （Linus Torvalds），Linux 的伟大的副产物
@@ -410,7 +410,8 @@ git checkout <fileName>
 git cherry-pick [commit]
 ```
 
-注意：永远不要 cherry-pick 已推送到远端的 commit，否则再次推送时会产生冲突。
+~~注意：永远不要 cherry-pick 已推送到远端的 commit，否则再次推送时会产生冲突。~~
+这句话是我错误的认知，删去。cherry-pick 的提交点再次合并回去之后，不会引起冲突。
 
 #### 4..gitignore
 

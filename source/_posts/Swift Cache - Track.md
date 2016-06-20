@@ -1,10 +1,9 @@
 ---
 title: Swift Cache - Track 实现笔记
 date: 2016-06-17 12:47:53
-tags: "iOS"
+tags: "Swift"
 categories: "学习笔记"
 ---
-</br>
 
 ### 引言
 

@@ -7,7 +7,7 @@ tags: "iOS"
 categories: "技术探讨"
 ---
 
-iOS开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也只是 AR C的。ARC 环境中，一个 var 声明的是`__weak`，那么当这个 var 不再被 `__strong` 引用时，这个 `__weak` 的 var 就会自动变成 nil，所以大多数情况下不必担心因为没有置 nil 而导致的野指针崩溃。
+iOS 开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也只是 ARC的。ARC 环境中，一个 var 声明的是`__weak`，那么当这个 var 不再被 `__strong` 引用时，这个 `__weak` 的 var 就会自动变成 nil，所以大多数情况下不必担心因为没有置 nil 而导致的野指针崩溃。
 
 但是，如果仍旧使用的是MRC，那么就不得不面对这个问题：
 网络请求中，大量使用到 block，如果当 block 中引用到了一个被 `__block` 关键字声明的变量，并且在这个 block 被回调的时候，这个 var 已经被释放了，那么此时 block 中捕获的这个 var 就成为了一个野指针。Objective-C 中，向一个 nil 的对象发送消息是不会崩溃的，但是对一个野指针发送对象是必然崩溃的。

@@ -1,4 +1,6 @@
 ---
 title: about
-date: 2016-01-08 14:23:31
+date: yyyy-mm-dd hh:mm:ss
+layout: about   # 添加使用 about 模版
 ---
+
