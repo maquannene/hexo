@@ -22,15 +22,15 @@ categories: "学习笔记"
 
 下图为 `MemoryCache` 对随机产生的不重复 key value 数组进行读写测试：
 
-<img src="http://ww2.sinaimg.cn/large/65312d9agw1f4x68eph0bj20q80iewg6.jpg" width = "400" height = "300" />
-<img src="http://ww1.sinaimg.cn/large/65312d9agw1f4x68gjqt9j20pg0iejt2.jpg" width = "400" height = "300" />
+<img src="http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg" width = "400" height = "300" />
+<img src="http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg" width = "400" height = "300" />
 
 YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰功能，但并没有引入 LRU 算法，所以在写入后的淘汰数据阶段 YY 和 Track 要快于其他 Cache 的重排序淘汰。其中 TM 速度非常慢，原因在于 TM 的 GCD 调度策略存在很大的问题，会导致同步小数据读写性能都损耗在 GCD 的调度上。这里值得一说的是 NSCache 对随机 key value 的读写性能不错，尤其是读，但是一旦出现相似形数据，性能就会变得非常低。
 
 下图为 `DiskCache` 对随机产生的不重复 key value 数组进行读写测试：
 
-<img src="http://ww3.sinaimg.cn/large/65312d9agw1f4yfxjo9rgj20p00ie3zp.jpg" width = "400" height = "300" />
-<img src="http://ww4.sinaimg.cn/large/65312d9agw1f4yfxlqtabj20po0iq3zq.jpg" width = "400" height = "300" />
+<img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg" width = "400" height = "300" />
+<img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg" width = "400" height = "300" />
 
 很明显，底层采用 sqlite 的 YY 性能要高于其他所有基于文件系统的库，所以这里基本可以分为 YYDiskCache 和 其他DiskCache。
 
@@ -47,8 +47,8 @@ YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰
 **方式一：** `并发队列 + barrier` + `信号量等待` 或 `串行队列` + `信号量等待`
 
 - 同步操作方式：
-	* 读：在`并发队列`或`串行队列`中同步进行读取
-	* 写：如果写队列为`串行队列`，则写操作直接异步扔串行队列，之后最外层加`信号量等待锁`变同步，详细参考 TMDiskCache 的同步写操作。</br> 如果写队列为`并发队列`，则写操作先外包裹 barrier，保证原子互斥性， 然后异步扔进并发队列，之后最外层加`信号量等待锁`变同步，详细参考 TMMemoryCache 的 同步写操作；</br>
+* 读：在`并发队列`或`串行队列`中同步进行读取
+* 写：如果写队列为`串行队列`，则写操作直接异步扔串行队列，之后最外层加`信号量等待锁`变同步，详细参考 TMDiskCache 的同步写操作。</br> 如果写队列为`并发队列`，则写操作先外包裹 barrier，保证原子互斥性， 然后异步扔进并发队列，之后最外层加`信号量等待锁`变同步，详细参考 TMMemoryCache 的 同步写操作；</br>
 - 异步操作方式：async 到操作队列执行 </br>
 
 上述这种模型，如果使用的是`并发队列`，即 TMMemoryCache 的调度模型，最终能达到读取时支持大并发同步读，写入时用 barrier 保证了写入的原子性、并且和读操作之间的互斥性。
@@ -59,7 +59,7 @@ YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰
 
 ```Objective-C
 dispatch_apply(count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(size_t i) { 
-	operation();
+operation();
 }
 
 //	这里使用 dispatch_apply 放入并发队列执行，如过 operation() 并不是非常耗时，不如直接使用 for loop
@@ -67,17 +67,17 @@ dispatch_apply(count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)
 ```
 总结一句话就是：如果发现实际的操作并不是非常耗时，就尽量不要用多线程去优化性能，否则大多数时间反而会消耗在线程切换上。
 
-除此之外，使用这种模型，当大量并发的调用同步读写时，会造成死锁的问题。
-   
+除此之外，使用这种模型时如果采用的是`并发队列 + barrier` + `信号量等待`，当大量并发的调用同步读写时，会造成死锁的问题。
+
 **方式二：** `并发队列` + `锁`
 
 - 同步操作方式：
-	* 读：当前线程直接加锁读。
-	* 写：当前线程直接加锁写。
+* 读：当前线程直接加锁读。
+* 写：当前线程直接加锁写。
 - 异步操作方式：
-	* 读：异步到并发队列加锁读。
-	* 写：异步到并发队列加锁写。
-	* 其实就是异步到并发队列调用上然后调用同步读写。
+* 读：异步到并发队列加锁读。
+* 写：异步到并发队列加锁写。
+* 其实就是异步到并发队列调用上然后调用同步读写。
 
 这种线程安全模型简单点说就是最终的读写操作都加高性能锁，保证每次最终的读写都互斥。相比于方式一，首先解决的问题就是同步操作的效率问题，因为都是在当前线程直接进行读写操作，没有任何线程调度，所以省去了线程切换的开销，同步读写性能远远高于方式一。其次解决的问题是没有了死锁，即使大量并发调用同步读写时，因为没有了方式一的信号量等待使异步变同步，并不会造成线程资源饱和导致无法解锁信号量导致死锁的问题。
 
@@ -138,9 +138,9 @@ unlock()
 
 ```
 func threadSafe(handler: () -> Void) {
-	lock()
-	handler()
-	unlock()
+lock()
+handler()
+unlock()
 }
 ```
 
@@ -158,7 +158,12 @@ func threadSafe(handler: () -> Void) {
 
 #### 支持 Subscript
 
-这个就不多说了，小功能，方便使用。
+```Swift
+let cache: Cache = Cache.shareInstance
+cache["key"] = "value"
+let _ = cache["key"]
+```
+读写操作更方便。
 
 ### 写在最后
 
