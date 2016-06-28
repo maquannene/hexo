@@ -21,8 +21,6 @@ Linus 在 1991 年创建了开源的 Linux 之后靠着开发者共同维护。
 
 理查德・斯托尔曼（Richard Stallman）自由软件倡导者，精神领袖，GNU计划创造者
 
-![RS](https://pic4.zhimg.com/2a980372a1e5aa27334e128fba5d556f_b.jpg)
-
 ![xx](https://ss1.baidu.com/70cFfyinKgQFm2e88IuM_a/forum/pic/item/adaf2edda3cc7cd9684f8ce83e01213fb80e91a5.jpg)
 
 并且有人开始对 BitKeeper 逆向，破解，BitKeeper 收回了 Linus 的免费使用权。
@@ -34,7 +32,7 @@ Linus 在 1991 年创建了开源的 Linux 之后靠着开发者共同维护。
 * 3.完全分布式
 * 4.简单易用的设计，bullshit
 
-Linus 不到两周时间， C 写了一个分布式版本控制系统，1300 行左右，之后靠 cherry-pickontributors 去壮大。
+Linus 不到两周时间， C 写了一个分布式版本控制系统，1300 行左右，之后靠 contributors 去壮大。
 
 **身世评价:**
 
@@ -110,7 +108,7 @@ git clone
 //查看配置
 git config --global --list
 //编辑配置
-git config --global --eidt
+git config --global --edit
 	
 //设置提交人
 git config --global user.name "John Doe"
