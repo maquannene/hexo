@@ -21,15 +21,17 @@ categories: "学习笔记"
 
 下图为 `MemoryCache` 对随机产生的不重复 key value 数组进行读写测试：
 
-<img src="http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg" width = "400" height = "300" />
-<img src="http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg" width = "400" height = "300" />
+<p style="overflow: hidden;">
+<img src="http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg" width="350" style="float: left;"><img src="http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg" width="350" style="float: left;">
+</p>
 
 YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰功能，但并没有引入 LRU 算法，所以在写入后的淘汰数据阶段 YY 和 Track 要快于其他 Cache 的重排序淘汰。其中 TM 速度非常慢，原因在于 TM 的 GCD 调度策略存在很大的问题，会导致同步小数据读写性能都损耗在 GCD 的调度上。这里值得一说的是 NSCache 对随机 key value 的读写性能不错，尤其是读，但是一旦出现相似形数据，性能就会变得非常低。
 
 下图为 `DiskCache` 对随机产生的不重复 key value 数组进行读写测试：
 
-<img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg" width = "400" height = "300" />
-<img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg" width = "400" height = "300" />
+<p style="overflow: hidden;">
+<img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg" width="350" style="float: left;"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg" width="350" style="float: left;">
+</p>
 
 很明显，底层采用 sqlite 的 YY 性能要高于其他所有基于文件系统的库，所以这里基本可以分为 YYDiskCache 和 其他DiskCache。
 
