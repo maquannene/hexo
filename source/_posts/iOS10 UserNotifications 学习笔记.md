@@ -74,8 +74,7 @@ A UNNotificationAttachment object contains audio, image, or video content to dis
 
 苹果的文档中对文件的类型和大小做了如下限制：
 
-<p style="text-align: center">
-<img src="http://ww1.sinaimg.cn/large/65312d9agw1f5a6clk2uij20lq0ki0u7.jpg" width = "350"/>
+<p style="text-align: center"><img src="http://ww1.sinaimg.cn/large/65312d9agw1f5a6clk2uij20lq0ki0u7.jpg" width = "350"/>
 </p>
 
 **使用：**
@@ -84,8 +83,7 @@ A UNNotificationAttachment object contains audio, image, or video content to dis
 * 对于远程推送通知服务，需要实现 UNNotificationServiceExtension（通知服务扩展），在回调方法中处理 推送内容时设置 request.content.attachments（请求内容的附件） 属性，之后调用 contentHandler 方法即可。
 * 无论是本地或者远程推送，如果没有支持 UNNotificationContentExtension （通知内容扩展），支持 3DTouch 设备下拉或重压后，附件会直接出现在 Content 中。如下图：
 
-<p style="text-align: center">
-<img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a7x2lu34j20a80dw0tl.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a7x2lu34j20a80dw0tl.jpg" width = "250"/>
 </p>
 
 这里需要说明的是 UNNotificationAttachment 的初始化方法：
@@ -107,8 +105,7 @@ iOS User Notifications 最大的革新在于加入了以 Extension 形式提供�
 
 通知内容扩展需要新建一个 UNNotificationContentExtension Target，之后只需在 viewcontroller 的中实现相应的接口，即可以对 app 的通知页面进行自定义扩展，扩展主要用于自定义 UI。
 
-<p style="text-align: center">
-<img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0bmg3ngj207g08umxf.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0bmg3ngj207g08umxf.jpg" width = "250"/>
 </p>
 
 创建好的 Extension Target 自带一个 ViewController，支持 stroyBoard 使用 autoLayout 布局，但是此 ViewController 不支持交互，加载上面的手势、button 等交互控件都将无效。若需交互，使用 UNNotificationAction （通知响应事件）提供按键或输入源，关于 UNNotificationAction 的用法之后 UNNotificationAction 小节会具体讲解。
@@ -120,14 +117,12 @@ iOS User Notifications 最大的革新在于加入了以 Extension 形式提供�
 * UNNotificationExtensionCategory: 要让通知支持内容扩展，需要将通知的 categoryIdentifier（类型标示） 加入此处。
 * UNNotificationExtensionDefaultContentHidden: 默认内容隐藏，如果设为 YES，则最下面通知 content 部分会隐藏。
 
-<p style="text-align: center">
-<img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a0cqbl7aj207e08maaa.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a0cqbl7aj207e08maaa.jpg" width = "250"/>
 </p>
 
 * UNNotificationExtensionIntialContentSizeRation: 初始内容 Size 的比例。也可以在 viewDidLoad 中使用 self.preferredContentSize 直接设置 Size。
 
-<p style="text-align: center">
-<img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0b1ufmyj207c08yaae.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0b1ufmyj207c08yaae.jpg" width = "250"/>
 </p>
 
 **使用：**
@@ -178,17 +173,22 @@ UNNotificationAction 代表一个响应通知的事件。可以为每个通知�
 
 普通点击按键，可设置 identifier、 title 及 点击后的响应，例如：foreground 前台响应，destructive 点击后销毁通知，authenticationRequired 响应前是否需要解锁。
 
-<p style="text-align: center">
-<img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a8uirxk9j20aa0hqwfh.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a8uirxk9j20aa0hqwfh.jpg" width = "250"/>
+</p>
+
+甚至可以使用 UNNotificationAction + accessoryInputView 结合，达到加入自定义辅助输入控件的效果：
+
+<p style="text-align: center"><img src="http://ww3.sinaimg.cn/large/65312d9agw1f5ei1fmukoj21ge0w6wig.jpg" width = 600/>
 </p>
 
 **UNTextInputNotificationAction：**
 
-继承自 UNNotificationAction，点击后呼出输入框进行输入交互。需要说的是，如果设备不支持 3DTouch，则不会支持这个功能。
+当然也可以直接使用系统类 UNTextInputNotificationAction 创建输入框，但是风格比较固定，所以如果想自定义的话，还是需要使用 UNNotificationAction + accessoryInputView。
 
-<p style="text-align: center">
-<img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a92073g9j20ac0e0mxx.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a92073g9j20ac0e0mxx.jpg" width = "250"/>
 </p>
+
+需要说的是，如果设备不支持 3DTouch，则不会支持这个功能。大概是因为如果不支持 3DTouch，就不支持 UNNotificationContentExtension 扩展，那么就没有可自定义 UIViewController，自然就不能加 accessoryInputView 了。
 
 **响应处理：**
 
@@ -201,8 +201,7 @@ func didReceive(_ response: UNNotificationResponse,
 
 如果不支持 UNNotificationContentExtension
 
-<p style="text-align: center">
-<img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a8siotq5j20d2072mxm.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a8siotq5j20d2072mxm.jpg" width = "250"/>
 </p>
 
 则点击会回调 UNUserNotificationCenterDelegate 中的方法：
