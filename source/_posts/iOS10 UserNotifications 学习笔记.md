@@ -22,10 +22,11 @@ categories: "装逼指南"
 * 2 . UNNotificationAttachment （通知附件）
 * 3 . UNNotificationContentExtension （通知内容扩展）
 * 4 . UNNotificationServiceExtension （通知服务扩展）
+* 5 . UNNotificationAction （通知响应事件）
 
 并且在文章最后给出具体的的 Demo 供大家参考。
 
-### 1. UNNotificationTrigger - 通知触发条件设定
+## 1. UNNotificationTrigger - 通知触发条件设定
 
 ![Trigger](http://ww3.sinaimg.cn/large/65312d9agw1f59uzqam85j21kw0iaq55.jpg)
 
@@ -64,7 +65,7 @@ let request = UNNotificationRequest.init(identifier: identifier,
                                          trigger: trigger)
 ```
 
-### 2. UNNotificationAttachment - 通知附件
+## 2. UNNotificationAttachment - 通知附件
 
 ![Attachment](http://ww2.sinaimg.cn/large/65312d9agw1f59vm2s2uwj21gc0g2acx.jpg)
 
@@ -95,7 +96,7 @@ func init(identifier: String, url URL: URL, options: [NSObject : AnyObject]? = [
 
 如果采取的是本地推送，直接读取文件的所在的位置的 URL 即可；如果是远程推送，由于 attachments 的设置是在 NotificationServiceExtension 的 Target 中，若需读取 Bundle 中的文件，记得将资源加入 NotificationServiceExtension Target 的 Copy Bundle Resource，不能直接读取 Containing App Target 中的 Bundle Resource。
 
-### 3. UNNotificationContentExtension - 通知内容扩展
+## 3. UNNotificationContentExtension - 通知内容扩展
 
 ![ContentExtension](http://ww4.sinaimg.cn/large/65312d9agw1f59y734woxj20py068mxu.jpg)
 
@@ -132,7 +133,7 @@ iOS User Notifications 最大的革新在于加入了以 Extension 形式提供�
 * 本地推送时，确保设置的 content.categoryIdentifier（通知内容类型标示） 已加入 plist 中。
 * 远程推送，需要设置 category 字段，且确保值也已加入 plist 中。
 
-### 4. UNNotificationServiceExtension - 通知服务扩展
+## 4. UNNotificationServiceExtension - 通知服务扩展
 
 ![ServiceExtension](http://ww1.sinaimg.cn/large/65312d9agw1f5a7mmfbf7j21e60eqmzi.jpg)
 
@@ -161,7 +162,7 @@ UNNotificationServiceExtension 提供在远程推送将要被 push 出来前，�
 }
 ```
 
-### 5. UNNotificationAction 通知响应事件
+## 5. UNNotificationAction 通知响应事件
 
 A UNNotificationAction object represents a task that your app can perform in response to a notification. You can define custom different actions for each type of notification that your app supports. The action object itself contains information about how to display that action onscreen. When the user selects that action, the system forwards the action’s identifier string to your app so that you can perform the corresponding task.
 
@@ -183,28 +184,28 @@ UNNotificationAction 代表一个响应通知的事件。可以为每个通知�
 
 **UNTextInputNotificationAction：**
 
-当然也可以直接使用系统类 UNTextInputNotificationAction 创建输入框，但是风格比较固定，所以如果想自定义的话，还是需要使用 UNNotificationAction + accessoryInputView。
+当然也可以直接使用系统类 UNTextInputNotificationAction 创建输入框，但是风格比较固定，比如下面这种：
 
 <p style="text-align: center"><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a92073g9j20ac0e0mxx.jpg" width = "250"/>
 </p>
 
-需要说的是，如果设备不支持 3DTouch，则不会支持这个功能。大概是因为如果不支持 3DTouch，就不支持 UNNotificationContentExtension 扩展，那么就没有可自定义 UIViewController，自然就不能加 accessoryInputView 了。
+所以如果想自定义风格多样化的输入框，还是需要使用 UNNotificationAction + accessoryInputView。需要说的是，如果设备不支持 3DTouch，则不支持自定义 accessoryInputView。大概是因为如果不支持 3DTouch，就不支持 UNNotificationContentExtension 扩展，那么就没有可自定义 UIViewController，自然就不能加 accessoryInputView 了。
 
 **响应处理：**
 
-若处于 UNNotificationContentExtension 通知扩展界面时，点击按键会回调 UNNotificationContentExtension 扩展接口的方法：
+若处于 UNNotificationContentExtension 通知扩展界面时，点击 `Comment` 按键会回调 UNNotificationContentExtension 扩展接口的方法：
 
 ```Swift
 func didReceive(_ response: UNNotificationResponse,
                 completionHandler completion: (UNNotificationContentExtensionResponseOption) -> Void) 
 ```
 
-如果不支持 UNNotificationContentExtension
+如果不支持 UNNotificationContentExtension，就会是下面这种样式：
 
-<p style="text-align: center"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a8siotq5j20d2072mxm.jpg" width = "250"/>
+<p style="text-align: center"><img src="http://ww3.sinaimg.cn/large/65312d9agw1f5hxw6fu78j20cy06y0ta.jpg" width = "250"/>
 </p>
 
-则点击会回调 UNUserNotificationCenterDelegate 中的方法：
+则点击 `Comment` 回调 UNUserNotificationCenterDelegate 中的方法：
 
 ```Swift
 func userNotificationCenter(_ center: UNUserNotificationCenter,
@@ -212,7 +213,7 @@ func userNotificationCenter(_ center: UNUserNotificationCenter,
                             withCompletionHandler completionHandler: () -> Void) {
 ```
 
-### 结束语
+## 结束语
 
 到这里 User Notifications 的功能就介绍的差不多了，可以看出几个核心的功能都需要 3DTouch 的支持，所以实用性方面还是比较受限制。
 

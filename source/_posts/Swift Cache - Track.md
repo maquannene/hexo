@@ -5,7 +5,7 @@ tags: "Swift"
 categories: "学习笔记"
 ---
 
-### 引言
+## 引言
 
 开始萌生出要写这个 [**Cache**](https://github.com/maquannene/Track) 念头，是想要练习一下 `Swift` 这门语言，顺便实战 `GCD 达到多线程安全` 和思考 `如何写一个易用的库`。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。
 
@@ -13,7 +13,7 @@ categories: "学习笔记"
 
 <!--more-->
 
-### 动手写之前
+## 动手写之前
 
 在开始写这个库之前，我已经拜读过 Objective-C 的一些 Cache 的源码，例如 Star 比较多的 [TMCache](https://github.com/tumblr/TMCache) 以及它的改良版 [PINCache](https://github.com/pinterest/PINCache)，以及功能不是那么强大的 EGOCache 和 SDImageCache，当然还有大名鼎鼎的 [YYCache](https://github.com/ibireme/YYCache)。相比之下 Swift 的此类库就相对少一些，[AwesomeCache](https://github.com/aschuch/AwesomeCache) 算是 Star 相对多一些的库了，其他类似 Haneke 功能不在对比的范围内。
 
@@ -35,7 +35,7 @@ YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰
 
 很明显，底层采用 sqlite 的 YY 性能要高于其他所有基于文件系统的库，所以这里基本可以分为 YYDiskCache 和 其他DiskCache。
 
-### 开始动手写
+## 开始动手写
 
 在动手之前，已经了解到了各个库的优劣，所以在写的时候，我尽量提取了一些优点融入了 Track 中，接下来会主要针对以下几点进行说明，某些点对缓存的性能起到了决定性的作用：
 
@@ -47,12 +47,48 @@ YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰
 
 **方式一：** `并发队列 + barrier` + `信号量等待` 或 `串行队列` + `信号量等待`
 
-- 同步操作方式：
-* 读：在`并发队列`或`串行队列`中同步进行读取
-* 写：如果写队列为`串行队列`，则写操作直接异步扔串行队列，之后最外层加`信号量等待锁`变同步，详细参考 TMDiskCache 的同步写操作。</br> 如果写队列为`并发队列`，则写操作先外包裹 barrier，保证原子互斥性， 然后异步扔进并发队列，之后最外层加`信号量等待锁`变同步，详细参考 TMMemoryCache 的 同步写操作；</br>
-- 异步操作方式：async 到操作队列执行 </br>
+- 异步操作方式：
+ * 读：异步到操作队列调用非线程安全读操作（例 TMMemoryCache 或 TMDiskCache）
+ 
+ ```Objective-C
+ dispatch_async(_queue, ^{
+ //  非线程安全读操作
+ //  objectForKey...
+ });
+ ```
+ * 写：
 
-上述这种模型，如果使用的是`并发队列`，即 TMMemoryCache 的调度模型，最终能达到读取时支持大并发同步读，写入时用 barrier 保证了写入的原子性、并且和读操作之间的互斥性。
+ 如果操作队列为并发队列，使用 barrier_async 调用非线程安全写（例  TMMemoryCache）
+ 
+ ```Objective-C
+ dispatch_barrier_async(_currentQueue, ^{
+ //  非线程安全写操作
+ //  setObjectForKey
+ });
+
+ ```
+ 如果操作队列为串行队列，那么只需 async 调用非线程安全写，不需要加 barrier
+ 
+ ```Objective-C
+ dispatch_async(_serialQueue, ^{
+ //  非线程安全写操作
+ //  setObjectForKey 
+ });
+ ```
+ 
+- 同步操作方式：调用上述异步操作方式，外部加信号量锁，变同步（例：TMMemoryCache 或 TMDiskCache）
+
+ ```Objective-C
+ dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+ // 线程安全异步读写
+ async_thread_safe_write_or_read(^{
+     dispatch_semaphore_signal(semaphore);
+ });
+ // 等待信号变同步
+ dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+ ```
+ 
+**总结：**上述这种模型，如果使用的是`并发队列`，即 TMMemoryCache，最终能达到读取时支持大并发同步读，写入时用 barrier 保证了写入的原子性、并且和读操作之间的互斥性。
 
 `并发队列` + `barrier` 亦或者直接使用 `串行队列` 看似是一个十分完美的解决方案，但是实际上隐藏着很大的弊端，因为往往使用者会忽略掉线程切换造成的性能损耗。千万不要小看这一点损耗，试着想一下，如果我们写入或者读取的数据非常小，那么就会造成实际写入或者读取的时间远小于线程切换的时间，最终得不偿失。试图想要用并发队列使同一时间尽可能多的执行任务，以提高效率，但实际却发现时间全部消耗在了线程切换上。
 
@@ -60,9 +96,8 @@ YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰
 
 ```Objective-C
 dispatch_apply(count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(size_t i) { 
-operation();
+	operation();
 }
-
 //	这里使用 dispatch_apply 放入并发队列执行，如过 operation() 并不是非常耗时，不如直接使用 for loop
 
 ```
@@ -73,20 +108,20 @@ operation();
 **方式二：** `并发队列` + `锁`
 
 - 同步操作方式：
-* 读：当前线程直接加锁读。
-* 写：当前线程直接加锁写。
+ * 读：当前线程直接加锁读。
+ * 写：当前线程直接加锁写。
 - 异步操作方式：
-* 读：异步到并发队列加锁读。
-* 写：异步到并发队列加锁写。
-* 其实就是异步到并发队列调用上然后调用同步读写。
+ * 读：异步到并发队列加锁读。
+ * 写：异步到并发队列加锁写。
+ * 其实就是异步到并发队列调用上然后调用同步读写。
 
-这种线程安全模型简单点说就是最终的读写操作都加高性能锁，保证每次最终的读写都互斥。相比于方式一，首先解决的问题就是同步操作的效率问题，因为都是在当前线程直接进行读写操作，没有任何线程调度，所以省去了线程切换的开销，同步读写性能远远高于方式一。其次解决的问题是没有了死锁，即使大量并发调用同步读写时，因为没有了方式一的信号量等待使异步变同步，并不会造成线程资源饱和导致无法解锁信号量导致死锁的问题。
+Track、YYCache、PINCache 都采用这种线程安全模型，简单点说就是最终的读写操作都加高性能锁，保证每次最终的读写都互斥。相比于方式一，首先解决的问题就是同步操作的效率问题，因为都是在当前线程直接进行读写操作，没有任何线程调度，所以省去了开辟和线程切换的开销，同步读写性能远远高于方式一。其次解决了死锁的为题，即使大量并发调用同步读写时，因为没有了方式一的信号量等待使异步变同步，并不会造成线程资源饱和导致无法解锁信号量导致死锁的问题。
 
 相比于方式一，方式二其实并不支持真正的并发同步读，因为最终读操作都是加锁的，所以每个读都互斥，而方式一是可以做到并发读。但是鉴于方式一的策略本身就有死锁的问题，并且这些并不能提高效率的并发操作也是建立在有死锁的风险上，所以方案并不可取。
 
 Track 使用方式二，`MemoryCache` `DiskCache` 文件的类是线程安全的，`LinkList` 中的类是非线程安全的。`MemoryCache` `DiskCache` 文件中在使用 `LinkList` 中的类时做了线程安全封装。
 
-#### 2.最近最不常使用淘汰
+#### 2.淘汰策略
 
 缓存的另一个功能是淘汰，每次设置数据完成后，都要对 count（总数） 和 cost（总内存占有量） 超出的部分进行移除，这两个淘汰功能所依据的条件是缓存对象的年龄，即 count 和 cost 淘汰每次从最老的数据开始移除。所以如何对对象年龄进行排序，也是决定性能好坏的因素之一。
 
@@ -147,7 +182,7 @@ unlock()
 
 后期我在优化性能时，发现闭包简直就是一个性能杀手，最后还是老老实实的前后调用加解锁函数。
 
-### 功能增加
+## 功能增加
 
 在写到 1.0 版本之后，我就在想，既然库是用 Swift 写的，如果没有一点 Swift 的功能，那岂不是等于抄袭别人写的代码然后翻译了一遍？所以就加入了些 Swift 的东西：
 
@@ -166,7 +201,7 @@ let _ = cache["key"]
 ```
 读写操作更方便。
 
-### 写在最后
+## 写在最后
 
 目前就功能和性能上来讲，Objective-C 的此类 Cache 库中，YYCache 绝对是最好的。Swift 中目前我还没有找同类功能较齐全的库，AwesomeCache 只拥有基本的功能，所以如果你在写 Swift 的项目，正巧需要一个 Cache，那么请使用 [**Track**](https://github.com/maquannene/Track) 吧。
 
