@@ -39,7 +39,7 @@ YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰
 
 在动手之前，已经了解到了各个库的优劣，所以在写的时候，我尽量提取了一些优点融入了 Track 中，接下来会主要针对以下几点进行说明，某些点对缓存的性能起到了决定性的作用：
 
-#### 1.线程调度
+### 1.线程调度
 
 良好的线程调度，是高性能的一个重要保证，如果没有使用良好的线程调度，就会造成上图中 TMMemoryCache 那种结果。（下面都是针对同步操作的效率的讨论，异步操作讨论意义不大）
 
@@ -121,7 +121,7 @@ Track、YYCache、PINCache 都采用这种线程安全模型，简单点说就�
 
 Track 使用方式二，`MemoryCache` `DiskCache` 文件的类是线程安全的，`LinkList` 中的类是非线程安全的。`MemoryCache` `DiskCache` 文件中在使用 `LinkList` 中的类时做了线程安全封装。
 
-#### 2.淘汰策略
+### 2.淘汰策略
 
 缓存的另一个功能是淘汰，每次设置数据完成后，都要对 count（总数） 和 cost（总内存占有量） 超出的部分进行移除，这两个淘汰功能所依据的条件是缓存对象的年龄，即 count 和 cost 淘汰每次从最老的数据开始移除。所以如何对对象年龄进行排序，也是决定性能好坏的因素之一。
 
@@ -139,9 +139,9 @@ TM 和 PIN 各自有一个记录每个存储对象 date 的字典，每次写入
 
 YYMemoryCache 和 Track.MemoryCache 都采用了这种方式，稍微有点不同的是，YY 的 cost 淘汰是异步到主线程调用的，Track 的 cost 是当前线程直接调用，这里各自的利弊就不多做评价了，各有各的想法吧，[具体讨论可以看这里](https://github.com/ibireme/YYCache/issues/54)。另外一点是很值得学习的，YY 在 count 淘汰时，是可选异步 release，设置 `releaseAsynchronously` 即可，这里需要提醒的是，我在小对象写入性能测试时，发现如果设置了 countLimit，YYMemoryCache 的效率就有明显下降，Profile 显示原因在异步到其他线程的过程消耗了一些性能，所以存储对象都为小对象且有 countLimit 时，建议将 releaseAsynchronously 设置为 NO。
 
-#### 3.容器选取及对象存储模型
+### 3.容器选取及对象存储模型
 
-##### 容器选取
+#### 容器选取
 
 **（1）Memory**
 
@@ -153,13 +153,13 @@ NSCache 和 Dic 的区别在于 NSCache 本身就是线程安全的，所以上�
 
 毫无疑问，文件系统的效率远远小于数据库。由于对数据库并不是很了解，所以关于 Disk 部分就不做讨论了，可以去看 YY 的作者写的文章，里面对磁盘存储做了很好的讨论。
 
-##### 存储模型
+#### 存储模型
 
 这里想说的其实就是 TM 和 PIN 存在的另外一个性能问题，TM 和 PIN 在写入 Memory 时，除了写入本身存储 object 的 dictionary，还另外有两个字典 dates 和 costs。看源码中，会发现每次写入 object 时，都会对这三个字典写入一遍，性能分析时，发现写入的时间基本被这三个操作平分，性能立刻下降一大截。
 
 Track 和 YY 则采用的是将 date 和 cost 都封装起来，每次写入或修改数据时，只用写或者读一次字典，这样性能就提升了很多。
 
-#### 4. 追求性能慎用闭包
+### 4. 追求性能慎用闭包
 
 我在刚开始写 Track 的同步操作时，发现每次保证线程安全都需要加信号量锁，所以每次的代码都是这样的：
 
@@ -186,13 +186,13 @@ unlock()
 
 在写到 1.0 版本之后，我就在想，既然库是用 Swift 写的，如果没有一点 Swift 的功能，那岂不是等于抄袭别人写的代码然后翻译了一遍？所以就加入了些 Swift 的东西：
 
-#### 支持 GeneratorType、SequenceType
+### 支持 GeneratorType、SequenceType
 
 我给 Track 中底层的的 LinkedList 和 LRU 实现了 `GeneratorType` 和 `SequenceType` 接口，这样 Track 上层封装后也支持了线程安全的 `GeneratorType` 和 `SequenceType`。这样就 Track 的 Cache、Memory、DiskMemory 都支持了 `for ... in` `map` `flapmap` `filter` 等一系列方法，功能更加强大啦。
 
 这里值得一说的是，Disk 的 Generator 有实现的是 `FastGeneratorType`，这样使得 Cache 遍历时，只要 MemoryCache 能读出值，DiskCache 指针快速移动即可，效率并不会降低，当 MemoryCache 读不到内容时，便开始读 DiskCache，并且数据衔结正确。
 
-#### 支持 Subscript
+### 支持 Subscript
 
 ```Swift
 let cache: Cache = Cache.shareInstance
